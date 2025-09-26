@@ -6,7 +6,8 @@ from PIL import Image
 
 
 class ServiceImage:
-    def encode_image(self, image: np.ndarray) -> bytes:
+    @staticmethod
+    def encode_image(image: np.ndarray) -> bytes:
         if image.dtype != np.uint8:
             image = (
                 image * 255).astype(np.uint8)
