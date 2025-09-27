@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 
-class ServiceImage:
+class ModuleImage:
     @staticmethod
     def encode_image(image: np.ndarray) -> bytes:
         if image.dtype != np.uint8:

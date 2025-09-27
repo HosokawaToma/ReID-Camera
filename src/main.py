@@ -1,27 +1,21 @@
 from datetime import datetime
 
-from application.api import ApplicationApi
-from application.yolo_camera import ApplicationYoloCamera
-from entities.api.person_crop_images_metadata import \
-    EntityApiPersonCropImagesMetadata
+from application.api.identify_person import ApplicationApiIdentifyPerson
+from application.camera import ApplicationCamera
+from application.yolo import ApplicationYolo
 
 
 class CameraApp:
     def __init__(self):
-        self.yolo_camera_application = ApplicationYoloCamera()
-        self.api_application = ApplicationApi(
-            server_ip="133.89.36.10")
+        self.camera = ApplicationCamera()
+        self.yolo = ApplicationYolo()
+        self.api_identify_person = ApplicationApiIdentifyPerson(server_ip="133.89.36.10")
 
     def run(self):
-        for person_cropped_images in self.yolo_camera_application.run():
-            metadata = EntityApiPersonCropImagesMetadata(
-                camera_id=0,
-                view_id=0,
-                timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-            )
-            self.api_application.post_person_cropped_images(
-                person_cropped_images,
-                metadata=metadata)
+        for frame in self.camera.run():
+            yolo_cropped_images = self.yolo.crop_persons(frame)
+            person_cropped_images = [cropped_image.cropped_image for cropped_image in yolo_cropped_images]
+            self.api_identify_person.post_person_cropped_images(person_cropped_images)
 
 if __name__ == "__main__":
     app = CameraApp()

@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 from ultralytics.engine.results import Boxes
 from ultralytics.models.yolo import YOLO
@@ -7,49 +5,46 @@ from ultralytics.models.yolo import YOLO
 from entities.yolo.bounding_box import EntityYoloBoundingBox
 from entities.yolo.detections import EntityYoloDetections
 
-MODEL_PATH = "resources/models/yolo11n.pt"
-CONFIDENCE_THRESHOLD = 0.5
-IOU_THRESHOLD = 0.3
-IMGSZ = (640, 640)
-AGNOSTIC_NMS = False
-PERSON_CLASS_ID = 0
-VERBOSE = False
-TRACKER = "bytetrack.yaml"
-DATA = "coco-pose.yaml"
 
-class ServiceYolo:
-    def __init__(self):
-        self.model = YOLO(MODEL_PATH)
-        self.confidence_threshold = CONFIDENCE_THRESHOLD
-        self.iou_threshold = IOU_THRESHOLD
-        self.imgsz = IMGSZ
-        self.agnostic_nms = AGNOSTIC_NMS
-        self.person_class_id = PERSON_CLASS_ID
-        self.verbose = VERBOSE
-        self.tracker = TRACKER
+class ApplicationYoloModel:
+    def __init__(
+        self,
+        model_path: str = "resources/models/yolo11n.pt",
+        confidence_threshold: float = 0.5,
+        iou_threshold: float = 0.3,
+        imgsz: tuple[int, int] = (640, 640),
+        agnostic_nms: bool = False,
+        person_class_id: int = 0,
+        verbose: bool = False,
+        tracker: str = "bytetrack.yaml",
+    ):
+        self.model = YOLO(model_path)
+        self.confidence_threshold = confidence_threshold
+        self.iou_threshold = iou_threshold
+        self.imgsz = imgsz
+        self.agnostic_nms = agnostic_nms
+        self.person_class_id = person_class_id
+        self.verbose = verbose
+        self.tracker = tracker
 
-    def extract_person_detections(self, frame: np.ndarray) -> List[EntityYoloDetections]:
-        results = self.model.track(
+    def extract_person_detections(self, frame: np.ndarray) -> list[EntityYoloDetections]:
+        yolo_results = self.model.track(
             frame,
             persist=True,
             classes=[self.person_class_id],
             conf=self.confidence_threshold,
             iou=self.iou_threshold,
+            imgsz=self.imgsz,
+            agnostic_nms=self.agnostic_nms,
             verbose=self.verbose,
             tracker=self.tracker,
-            data=DATA,
-            imgsz=self.imgsz,
-            agnostic_nms=self.agnostic_nms
         )
 
-        if not results or len(results) == 0:
-            return []
-
         detections = []
-        result = results[0]
+        yolo_result = yolo_results[0]
 
-        if result.boxes is not None:
-            for box in result.boxes:
+        if yolo_result.boxes is not None:
+            for box in yolo_result.boxes:
                 box: Boxes
                 if box.id is not None:
                     box_id = int(box.id[0].cpu().numpy())
@@ -66,7 +61,7 @@ class ServiceYolo:
                 box_conf = box.conf[0].cpu().numpy()
                 box_cls = int(box.cls[0].cpu().numpy())
                 bounding_box = EntityYoloBoundingBox(
-                        box_x1, box_y1, box_x2, box_y2, box_width, box_height)
+                    box_x1, box_y1, box_x2, box_y2, box_width, box_height)
                 detections.append(EntityYoloDetections(
                     box_id, bounding_box, box_conf, box_cls
                 ))

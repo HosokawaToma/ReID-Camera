@@ -1,7 +1,7 @@
 import cv2
 
 
-class ServiceCamera:
+class ApplicationCamera:
     def __init__(self):
         self.camera = cv2.VideoCapture(0)
 

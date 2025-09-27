@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
+import numpy as np
+
 from entities.yolo.bounding_box import EntityYoloBoundingBox
 
 
 @dataclass
-class EntityYoloDetections:
-    detection_id: int
+class EntityYoloCropPerson:
     bounding_box: EntityYoloBoundingBox
-    confidence: float
-    cls: int
+    cropped_image: np.ndarray
