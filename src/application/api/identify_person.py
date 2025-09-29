@@ -22,6 +22,6 @@ class ApplicationApiIdentifyPerson:
         data = {
             "camera_id": camera_id,
             "view_id": view_id,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         }
-        requests.post(self.person_cropped_images_url, files=files, data=data)
+        requests.post(self.person_cropped_images_url, files=files, data=data, verify=False)

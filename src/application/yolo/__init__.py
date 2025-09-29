@@ -21,4 +21,4 @@ class ApplicationYolo:
     def crop_persons(self, frame: np.ndarray) -> list[EntityYoloCropPerson]:
         detections = self.model.extract_person_detections(frame)
         detections = self.verifier.verify(detections)
-        return self.cropper.crop(frame, detections)
+        return self.cropper.crops(frame, detections)
