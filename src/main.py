@@ -1,25 +1,50 @@
-from application.api.identify_person import ApplicationApiIdentifyPerson
-from application.api.rtc import ApplicationApiRtc
-from application.camera import ApplicationCamera
-from application.yolo import ApplicationYolo
+import asyncio
+
+import cv2
+
+from application.api import ApplicationApi
+from application.environment import ApplicationEnvironment
+from application.identify_person import ApplicationIdentifyPerson
+from application.webrtc import ApplicationWebRTC
 
 
 class CameraApp:
-    def __init__(self, camera_id: int = 0, view_id: int = 0):
-        self.camera_id = camera_id
-        self.view_id = view_id
-        self.camera = ApplicationCamera()
-        self.yolo = ApplicationYolo()
-        self.api_identify_person = ApplicationApiIdentifyPerson(server_ip="133.89.36.10")
-        #self.api_rtc = ApplicationApiRtc(server_ip="133.89.36.10")
+    def __init__(self):
+        self.camera = cv2.VideoCapture(0)
+        self.environment = ApplicationEnvironment()
+        self.server_ip = self.environment.get_api_server_ip()
+        self.api_client_id = self.environment.get_api_client_id()
+        self.api_password = self.environment.get_api_password()
+        self.webrtc_turn_username = self.environment.get_webrtc_turn_username()
+        self.webrtc_turn_password = self.environment.get_webrtc_turn_password()
+        self.api = ApplicationApi(
+            server_ip=self.environment.get_api_server_ip(),
+        )
+        self.token = self.api.login(
+            client_id=self.environment.get_api_client_id(),
+            password=self.environment.get_api_password(),
+        )
+        if self.token is None:
+            raise Exception("Failed to login")
+        self.webrtc = ApplicationWebRTC(
+            camera=self.camera,
+            server_ip=self.server_ip,
+            token=self.token,
+            turn_username=self.webrtc_turn_username,
+            turn_password=self.webrtc_turn_password,
+        )
+        self.identify_person = ApplicationIdentifyPerson(
+            server_ip=self.environment.get_api_server_ip(),
+            token=self.token,
+            camera=self.camera,
+        )
 
-    def run(self):
-        for frame in self.camera.run():
-            yolo_cropped_images = self.yolo.crop_persons(frame)
-            person_cropped_images = [cropped_image.cropped_image for cropped_image in yolo_cropped_images]
-            self.api_identify_person.post_person_cropped_images(person_cropped_images, self.camera_id, self.view_id)
-            #self.api_rtc.put_frame(frame)
+    async def run(self):
+        asyncio.gather(
+            self.webrtc.start_streaming(),
+            self.identify_person.run(),
+        )
 
 if __name__ == "__main__":
     app = CameraApp()
-    app.run()
+    asyncio.run(app.run())

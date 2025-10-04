@@ -4,7 +4,7 @@ from entities.yolo.bounding_box import EntityYoloBoundingBox
 from entities.yolo.detections import EntityYoloDetections
 
 
-class ApplicationYoloDetectionsVerifier:
+class ApplicationIdentifyPersonYoloDetectionsVerifier:
     def __init__(self, margin: int = 50):
         self.margin = margin
 

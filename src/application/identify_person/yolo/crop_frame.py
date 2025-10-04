@@ -6,7 +6,7 @@ from entities.yolo.crop_person import EntityYoloCropPerson
 from entities.yolo.detections import EntityYoloDetections
 
 
-class ApplicationYoloCropFrame:
+class ApplicationIdentifyPersonYoloCropFrame:
     def crop(self, frame: np.ndarray, detection: EntityYoloDetections) -> EntityYoloCropPerson:
         person_cropped_image = frame[
             detection.bounding_box.y1:detection.bounding_box.y2,
