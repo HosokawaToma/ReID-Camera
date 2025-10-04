@@ -1,6 +1,6 @@
 import asyncio
 
-import cv2
+import numpy as np
 
 from application.webrtc.configuration import ApplicationWebRTCConfiguration
 from application.webrtc.peer_connection import ApplicationWebRTCPeerConnection
@@ -9,8 +9,7 @@ from application.webrtc.video_stream_track import \
 
 
 class ApplicationWebRTC:
-    def __init__(self, camera: cv2.VideoCapture, server_ip: str, token: str, turn_username: str, turn_password: str):
-        self.camera = camera
+    def __init__(self, server_ip: str, token: str, turn_username: str, turn_password: str):
         self.server_ip = server_ip
         self.token = token
         self.configuration = ApplicationWebRTCConfiguration(
@@ -18,7 +17,7 @@ class ApplicationWebRTC:
             turn_username=turn_username,
             turn_password=turn_password,
         )
-        self.media_stream_track = ApplicationWebRTCVideoStreamTrack(camera)
+        self.media_stream_track = ApplicationWebRTCVideoStreamTrack()
         self.peer_connection = ApplicationWebRTCPeerConnection(
             server_ip=server_ip,
             token=token,
@@ -27,6 +26,10 @@ class ApplicationWebRTC:
         )
 
     async def start_streaming(self):
+        print("Starting streaming")
         await self.peer_connection.connect()
         while self.peer_connection.is_connected():
             await asyncio.sleep(1)
+
+    def send_frame(self, frame: np.ndarray):
+        self.media_stream_track.send_frame(frame)

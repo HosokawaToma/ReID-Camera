@@ -27,7 +27,6 @@ class CameraApp:
         if self.token is None:
             raise Exception("Failed to login")
         self.webrtc = ApplicationWebRTC(
-            camera=self.camera,
             server_ip=self.server_ip,
             token=self.token,
             turn_username=self.webrtc_turn_username,
@@ -36,14 +35,25 @@ class CameraApp:
         self.identify_person = ApplicationIdentifyPerson(
             server_ip=self.environment.get_api_server_ip(),
             token=self.token,
-            camera=self.camera,
         )
 
     async def run(self):
-        asyncio.gather(
-            self.webrtc.start_streaming(),
-            self.identify_person.run(),
-        )
+        streaming_task = asyncio.create_task(self.webrtc.start_streaming())
+        try:
+            while True:
+                ret, frame = self.camera.read()
+                if not ret:
+                    print("Failed to read frame from camera")
+                    break
+                self.webrtc.send_frame(frame)
+                self.identify_person.run(frame)
+                await asyncio.sleep(0.033)
+        except KeyboardInterrupt:
+            print("Application is shutting down...")
+        finally:
+            print("Streaming task cancelled")
+            streaming_task.cancel()
+
 
 if __name__ == "__main__":
     app = CameraApp()
