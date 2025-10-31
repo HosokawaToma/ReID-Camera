@@ -6,7 +6,7 @@ from entities.yolo.bounding_box import EntityYoloBoundingBox
 from entities.yolo.detections import EntityYoloDetections
 
 
-class ApplicationIdentifyPersonYoloModel:
+class ApplicationYoloModel:
     def __init__(
         self,
         model_path: str = "resources/models/yolo11n.pt",
