@@ -29,22 +29,18 @@ class ApplicationApiIdentifyPerson:
             self.TIMESTAMP_KEY: self.now_timestamp(),
         }
         requests.post(
-            self.api.BASE_URL + self.IDENTIFY_PERSON_URI,
-            headers=self.api.HEADER,
+            self.api.base_url + self.IDENTIFY_PERSON_URI,
+            headers=self.api.header,
             files=images,
             data=data,
             verify=False,
         )
 
     def encode_image(self, image: np.ndarray) -> bytes:
-        if image.dtype != np.uint8:
-            image = (
-                image * 255).astype(np.uint8)
-        image_rgb = cv2.cvtColor(
-            image, cv2.COLOR_BGR2RGB)
-        image: Image.Image = Image.fromarray(image_rgb)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_pil: Image.Image = Image.fromarray(image_rgb)
         buffer = io.BytesIO()
-        image.save(buffer, format="JPEG")
+        image_pil.save(buffer, format="JPEG")
         image_bytes = buffer.getvalue()
         return image_bytes
 

@@ -14,8 +14,8 @@ class ApplicationRTCConnection:
 
     def post(self, sdp: EntityRTCSdp) -> EntityRTCSdp:
         response = requests.post(
-            f"{self.api.BASE_URL}{self.RTC_CONNECTION_URI}",
-            headers=self.api.HEADER,
+            f"{self.api.base_url}{self.RTC_CONNECTION_URI}",
+            headers=self.api.header,
             json={
                 self.SDP_KEY: sdp.sdp,
                 self.TYPE_KEY: sdp.type,

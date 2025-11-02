@@ -46,10 +46,6 @@ class ApplicationYoloModel:
         if yolo_result.boxes is not None:
             for box in yolo_result.boxes:
                 box: Boxes
-                if box.id is not None:
-                    box_id = int(box.id[0].cpu().numpy())
-                else:
-                    box_id = None
                 box_xyxy = box.xyxy[0].cpu().numpy()
                 box_x1 = int(box_xyxy[0])
                 box_y1 = int(box_xyxy[1])
@@ -58,12 +54,14 @@ class ApplicationYoloModel:
                 box_xywh = box.xywh[0].cpu().numpy()
                 box_width = int(box_xywh[2])
                 box_height = int(box_xywh[3])
-                box_conf = box.conf[0].cpu().numpy()
+                box_conf = float(box.conf[0].cpu().numpy())
                 box_cls = int(box.cls[0].cpu().numpy())
                 bounding_box = EntityYoloBoundingBox(
                     box_x1, box_y1, box_x2, box_y2, box_width, box_height)
                 detections.append(EntityYoloDetections(
-                    box_id, bounding_box, box_conf, box_cls
+                    bounding_box=bounding_box,
+                    confidence=box_conf,
+                    cls=box_cls,
                 ))
 
         return detections

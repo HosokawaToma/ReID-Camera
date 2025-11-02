@@ -15,8 +15,8 @@ class ApplicationRTCIceServer:
 
     def get(self) -> EntityRTCIceServer:
         response = requests.get(
-            f"{self.api.BASE_URL}{self.RTC_ICE_SERVER_URI}",
-            headers=self.api.HEADER,
+            f"{self.api.base_url}{self.RTC_ICE_SERVER_URI}",
+            headers=self.api.header,
         )
         if response.status_code != 200:
             raise Exception("Failed to get ICE server")

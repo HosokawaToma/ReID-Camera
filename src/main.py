@@ -3,6 +3,7 @@ import time
 
 import cv2
 
+import src.entities.environment.api as entities_environment_api
 from application.api import ApplicationApi
 from application.api.identify_person import ApplicationApiIdentifyPerson
 from application.api.rtc.connection import ApplicationRTCConnection

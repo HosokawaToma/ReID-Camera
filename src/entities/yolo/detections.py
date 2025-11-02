@@ -5,7 +5,6 @@ from entities.yolo.bounding_box import EntityYoloBoundingBox
 
 @dataclass
 class EntityYoloDetections:
-    detection_id: int
     bounding_box: EntityYoloBoundingBox
     confidence: float
     cls: int

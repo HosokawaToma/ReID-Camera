@@ -6,7 +6,7 @@ class EntitiesEnvironmentApi:
     base_url: str
     client_id: str
     password: str
-    header: dict[str, str] = field(default=None)
+    header: dict[str, str] = field(init=False)
 
     HEADER_AUTHORIZATION_KEY = "Authorization"
     HEADER_AUTHORIZATION_FORMAT = "Bearer {token}"
