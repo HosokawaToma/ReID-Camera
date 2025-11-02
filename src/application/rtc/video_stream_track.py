@@ -5,13 +5,12 @@ import numpy as np
 from aiortc import VideoStreamTrack
 
 
-class ApplicationWebRTCVideoStreamTrack(VideoStreamTrack):
+class ApplicationRTCVideoStreamTrack(VideoStreamTrack):
     def __init__(self):
         self.send_frames: asyncio.Queue[np.ndarray] = asyncio.Queue()
         super().__init__()
 
     async def recv(self):
-        print("Receiving frame")
         pts, time_base = await self.next_timestamp()
         frame = await self.send_frames.get()
         if frame is None:
