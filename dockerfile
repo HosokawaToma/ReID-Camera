@@ -1,14 +1,22 @@
-FROM python:3.10.17
+# pip install
+FROM python:3.10.17 AS pip-install
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
+# apt install
+FROM python:3.10.17 AS apt-install
 RUN apt-get update && \
     apt-get install -y libgl1-mesa-glx libglib2.0-0 && \
     rm -rf /var/lib/apt/lists/*
 
+# メイン
+FROM python:3.10.17
+
 WORKDIR /app
 
-COPY requirements.txt .
+COPY --from=apt-install /usr/local /usr/local
 
-RUN pip install -r requirements.txt
+COPY --from=pip-install /usr/local /usr/local
 
 COPY . .
 
