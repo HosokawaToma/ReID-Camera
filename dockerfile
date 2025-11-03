@@ -14,6 +14,7 @@ RUN apt-get update && \
 
 COPY --from=pip-install /usr/local /usr/local
 
-COPY . .
+COPY ./src ./src
+COPY ./resources ./resources
 
 ENTRYPOINT ["python", "src/main.py"]
