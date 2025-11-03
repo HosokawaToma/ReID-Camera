@@ -5,6 +5,8 @@ services:
       dockerfile: dockerfile
     ports:
       - 8000:8000
+    volumes:
+      - ./resources:/app/resources:rw
     devices:
       - /dev/video0:/dev/video0
     env_file:
