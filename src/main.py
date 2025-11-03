@@ -82,7 +82,9 @@ class CameraApp:
 if __name__ == "__main__":
     while True:
         try:
+            print("create CameraApp")
             app = CameraApp.create(Environment())
+            print("run CameraApp")
             asyncio.run(app.run())
         except Exception as e:
             print(e)

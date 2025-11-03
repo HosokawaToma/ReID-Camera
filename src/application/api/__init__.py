@@ -23,6 +23,9 @@ class ApplicationApi:
     def _login(self) -> str:
         response = requests.post(
             self.base_url + self.LOGIN_URI,
+            headers={
+                "Content-Type": "application/json",
+            },
             json={
                 self.CLIENT_ID_KEY_ON_REQUEST: self.camera_client_id,
                 self.PASSWORD_KEY_ON_REQUEST: self.camera_client_password,
