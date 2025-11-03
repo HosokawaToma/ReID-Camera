@@ -20,6 +20,7 @@ class ApplicationRTCConnection:
                 self.SDP_KEY: sdp.sdp,
                 self.TYPE_KEY: sdp.type,
             },
+            verify=False,
         )
         if response.status_code != 200:
             raise Exception("Failed to post RTC connection")

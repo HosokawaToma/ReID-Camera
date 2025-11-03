@@ -17,6 +17,7 @@ class ApplicationRTCIceServer:
         response = requests.get(
             f"{self.api.base_url}{self.RTC_ICE_SERVER_URI}",
             headers=self.api.header,
+            verify=False,
         )
         if response.status_code != 200:
             raise Exception("Failed to get ICE server")
