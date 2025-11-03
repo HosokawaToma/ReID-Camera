@@ -2,10 +2,10 @@ import requests
 
 
 class ApplicationApi:
-    token: str
+    TOKEN = None
     LOGIN_URI = "/login/camera_client"
     CLIENT_ID_KEY_ON_REQUEST = "camera_client_id"
-    PASSWORD_KEY_ON_REQUEST = "camera_client_password"
+    PASSWORD_KEY_ON_REQUEST = "password"
     TOKEN_KEY_ON_RESPONSE = "token"
     HEADER_AUTHORIZATION_KEY = "Authorization"
     HEADER_AUTHORIZATION_FORMAT = "Bearer {token}"
@@ -14,10 +14,10 @@ class ApplicationApi:
         self.base_url = base_url
         self.camera_client_id = camera_client_id
         self.camera_client_password = camera_client_password
-        if not self.token:
-            self.token = self._login()
+        if not self.TOKEN:
+            self.TOKEN = self._login()
         self.header = {
-            self.HEADER_AUTHORIZATION_KEY: self.HEADER_AUTHORIZATION_FORMAT.format(token=self.token)
+            self.HEADER_AUTHORIZATION_KEY: self.HEADER_AUTHORIZATION_FORMAT.format(token=self.TOKEN)
         }
 
     def _login(self) -> str:
@@ -27,6 +27,7 @@ class ApplicationApi:
                 self.CLIENT_ID_KEY_ON_REQUEST: self.camera_client_id,
                 self.PASSWORD_KEY_ON_REQUEST: self.camera_client_password,
             },
+            verify=False,
         )
         if response.status_code != 200:
             raise Exception("Failed to login")
