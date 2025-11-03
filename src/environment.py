@@ -1,5 +1,8 @@
 import os
 
+import dotenv
+
+dotenv.load_dotenv()
 
 class Environment:
     CAMERA_INDEX = "CAMERA_INDEX"
