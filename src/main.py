@@ -60,14 +60,16 @@ class CameraApp:
         remote_description = self.rtc_connection.post(local_description)
         await self.rtc_peer_connection.set_remote_description(remote_description)
         streaming_task = asyncio.create_task(self.rtc_peer_connection.start_streaming())
+        print("start streaming")
         try:
             while True:
                 ret, frame = self.camera.read()
                 if not ret:
                     break
                 self.rtc_peer_connection.send_frame(frame)
+                print("send frame")
                 yolo_crop_persons = self.yolo.crop_persons(frame)
-                if len(yolo_crop_persons) > 0:
+                if len(yolo_crop_persons) == 0:
                     await asyncio.sleep(0.033)
                     continue
                 image_bytes_list = [
@@ -75,6 +77,7 @@ class CameraApp:
                     for person in yolo_crop_persons
                     ]
                 self.identify_person.request(image_bytes_list)
+                print("identify person request")
                 await asyncio.sleep(0.033)
         except KeyboardInterrupt:
             return
