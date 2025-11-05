@@ -61,9 +61,18 @@ fi
 
 # 仮想環境の有効化と依存関係のインストール
 echo -e "${YELLOW}[3/5] 依存関係のインストール中...${NC}"
-source "$VENV_PATH/bin/activate"
-pip install --upgrade pip
-pip install -r "$PROJECT_ROOT/requirements.txt"
+
+# 仮想環境内のpythonとpipを直接使用
+VENV_PYTHON="$VENV_PATH/bin/python"
+VENV_PIP="$VENV_PATH/bin/pip"
+
+if [ ! -f "$VENV_PIP" ]; then
+    echo -e "${RED}エラー: 仮想環境のpipが見つかりません。仮想環境の作成を確認してください。${NC}"
+    exit 1
+fi
+
+"$VENV_PIP" install --upgrade pip
+"$VENV_PIP" install -r "$PROJECT_ROOT/requirements.txt"
 echo -e "${GREEN}依存関係のインストールが完了しました。${NC}"
 
 # サービスファイルの設定
