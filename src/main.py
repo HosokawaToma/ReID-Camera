@@ -65,8 +65,11 @@ class CameraApp:
                 ret, frame = self.camera.read()
                 if not ret:
                     break
-                yolo_crop_persons = self.yolo.crop_persons(frame)
                 self.rtc_peer_connection.send_frame(frame)
+                yolo_crop_persons = self.yolo.crop_persons(frame)
+                if len(yolo_crop_persons) > 0:
+                    await asyncio.sleep(0.033)
+                    continue
                 image_bytes_list = [
                     self.identify_person.encode_image(person.cropped_image)
                     for person in yolo_crop_persons
