@@ -33,13 +33,13 @@ class ApplicationApi:
             verify=False,
         )
         if response.status_code != 200:
-            raise Exception("Failed to login")
+            raise Exception("Status code is not 200: Failed to login")
         json = response.json()
         if self.TOKEN_KEY_ON_RESPONSE not in json:
-            raise Exception("Failed to login")
+            raise Exception("Token key is not in response: Failed to login")
         token = json[self.TOKEN_KEY_ON_RESPONSE]
         if token is None:
-            raise Exception("Failed to login")
+            raise Exception("Token is None: Failed to login")
         if not isinstance(token, str):
-            raise Exception("Failed to login")
+            raise Exception("Token is not a string: Failed to login")
         return token
