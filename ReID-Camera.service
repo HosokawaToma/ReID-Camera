@@ -4,8 +4,6 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/komorilab/ReID-Camera/src
-ExecStartPre="git fetch"
-ExecStartPre="git pull"
 ExecStart="/home/User/ReID-Camera/.venv/bin/python ./src/main.py"
 StandardOutput=inherit
 StandardError=inherit
