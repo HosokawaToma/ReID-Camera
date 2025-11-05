@@ -8,6 +8,7 @@ ExecStart="/home/User/ReID-Camera/.venv/bin/python ./src/main.py"
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
+User=komorilab
 
 [Install]
 WantedBy=multi-user.target
