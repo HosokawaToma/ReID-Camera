@@ -10,7 +10,7 @@ class ApplicationYoloModel:
     def __init__(
         self,
         model_path: str = "resources/models/yolo11n.pt",
-        confidence_threshold: float = 0.5,
+        confidence_threshold: float = 0.9,
         iou_threshold: float = 0.3,
         imgsz: tuple[int, int] = (640, 640),
         agnostic_nms: bool = False,
