@@ -3,7 +3,7 @@ import requests
 
 class ApplicationApi:
     TOKEN = None
-    LOGIN_URI = "/login/camera_client"
+    LOGIN_URI = "/auth/login/camera_client"
     CLIENT_ID_KEY_ON_REQUEST = "camera_client_id"
     PASSWORD_KEY_ON_REQUEST = "password"
     TOKEN_KEY_ON_RESPONSE = "token"
@@ -35,6 +35,8 @@ class ApplicationApi:
         if response.status_code != 200:
             raise Exception("Status code is not 200: Failed to login")
         json = response.json()
+        if not isinstance(json, dict):
+            raise Exception("Response is not a dictionary: Failed to login")
         if self.TOKEN_KEY_ON_RESPONSE not in json:
             raise Exception("Token key is not in response: Failed to login")
         token = json[self.TOKEN_KEY_ON_RESPONSE]
