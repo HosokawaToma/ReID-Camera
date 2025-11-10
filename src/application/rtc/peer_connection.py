@@ -16,6 +16,8 @@ class ApplicationWebRTCPeerConnection:
     ):
         self.peer_connection = None
         self.video_stream_track = video_stream_track
+        self.connected = asyncio.Event()
+        self.task = None
 
     def create_peer_connection(self, ice_server: EntityRTCIceServer):
         self.peer_connection = RTCPeerConnection(
@@ -32,7 +34,6 @@ class ApplicationWebRTCPeerConnection:
         self.peer_connection.on("connectionstatechange",
                                 self._on_connectionstatechange)
         self.peer_connection.addTrack(self.video_stream_track)
-        self.connected = asyncio.Event()
 
     async def set_local_description(self) -> EntityRTCSdp:
         if self.peer_connection is None:
@@ -53,8 +54,11 @@ class ApplicationWebRTCPeerConnection:
         ))
 
     async def start_streaming(self):
-        while self._is_connected():
+        while self.is_connected():
             await asyncio.sleep(1)
+
+    async def wait_connected(self):
+        await self.connected.wait()
 
     def send_frame(self, frame: np.ndarray):
         self.video_stream_track.send_frame(frame)
@@ -65,9 +69,9 @@ class ApplicationWebRTCPeerConnection:
         if self.peer_connection.connectionState == "connected":
             self.connected.set()
         elif self.peer_connection.connectionState in ["failed", "closed", "disconnected"]:
-            self.connected.set()
+            self.connected.clear()
 
-    def _is_connected(self):
+    def is_connected(self):
         if self.peer_connection is None:
             return False
         return self.peer_connection.connectionState == "connected"
