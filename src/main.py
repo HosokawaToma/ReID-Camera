@@ -55,20 +55,20 @@ class CameraApp:
         )
 
     async def run(self):
-        self.rtc_peer_connection.create_peer_connection(self.rtc_ice_server.get())
-        local_description = await self.rtc_peer_connection.set_local_description()
-        remote_description = self.rtc_connection.post(local_description)
-        await self.rtc_peer_connection.set_remote_description(remote_description)
-        await self.rtc_peer_connection.wait_connected()
-        task = asyncio.create_task(self.rtc_peer_connection.start_streaming())
-        print("start streaming")
+        # self.rtc_peer_connection.create_peer_connection(self.rtc_ice_server.get())
+        # local_description = await self.rtc_peer_connection.set_local_description()
+        # remote_description = self.rtc_connection.post(local_description)
+        # await self.rtc_peer_connection.set_remote_description(remote_description)
+        # await self.rtc_peer_connection.wait_connected()
+        # task = asyncio.create_task(self.rtc_peer_connection.start_streaming())
+        # print("start streaming")
         try:
             while True:
                 ret, frame = self.camera.read()
                 if not ret:
                     break
-                if not self.rtc_peer_connection.is_connected():
-                    raise Exception("Peer connection is not connected")
+                # if not self.rtc_peer_connection.is_connected():
+                    # raise Exception("Peer connection is not connected")
                 self.rtc_peer_connection.send_frame(frame)
                 yolo_crop_persons = self.yolo.crop_persons(frame)
                 if len(yolo_crop_persons) == 0:
@@ -81,10 +81,11 @@ class CameraApp:
                 self.identify_person.request(image_bytes_list)
                 await asyncio.sleep(0.033)
         except KeyboardInterrupt:
-            task.cancel()
+            # task.cancel()
             return
         finally:
-            task.cancel()
+            # task.cancel()
+            pass
 
 
 if __name__ == "__main__":
