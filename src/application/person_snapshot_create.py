@@ -1,14 +1,27 @@
-import logging
-
 from environment import Environment
 from modules.image import ModuleImage
-from repository.api.auth.login.camera_client import \
-    RepositoryApiAuthLoginCameraClient
+from repository.api.auth.login.camera_client import (
+    RepositoryApiAuthLoginCameraClient,
+    RepositoryApiAuthLoginCameraClientError)
 from repository.api.person.snapshot.create import (
-    RepositoryApiPersonSnapshotCreate, RepositoryApiPersonSnapshotCreateError,
-    RepositoryApiPersonSnapshotCreateParams)
+    RepositoryApiPersonSnapshotCreate,
+    RepositoryApiPersonSnapshotCreateNotSuccessfulError,
+    RepositoryApiPersonSnapshotCreateParams,
+    RepositoryApiPersonSnapshotCreateUnauthorizedError)
 from repository.person_crop_queue import RepositoryPersonCropQueue
 
+
+class ApplicationPersonSnapshotCreateError(Exception):
+    pass
+
+class ApplicationPersonSnapshotCreatePersonSnapshotCreateApiError(ApplicationPersonSnapshotCreateError):
+    pass
+
+class ApplicationPersonSnapshotCreateAuthLoginApiError(ApplicationPersonSnapshotCreateError):
+    pass
+
+class ApplicationPersonSnapshotCreatePersonCropQueueError(ApplicationPersonSnapshotCreateError):
+    pass
 
 class ApplicationPersonSnapshotCreate:
     def __init__(
@@ -22,7 +35,7 @@ class ApplicationPersonSnapshotCreate:
         self.image = image
         self.auth_login_camera_client = auth_login_camera_client
         self.person_snapshot_create = person_snapshot_create
-        self.token = self.auth_login_camera_client.request()
+        self.token = None
 
     @classmethod
     def create(
@@ -41,9 +54,14 @@ class ApplicationPersonSnapshotCreate:
         )
 
     async def handle(self) -> None:
+        try:
+            if self.token is None:
+                self.token = self.auth_login_camera_client.request()
+        except RepositoryApiAuthLoginCameraClientError:
+            raise ApplicationPersonSnapshotCreateAuthLoginApiError
         crop = await self.person_crop_queue.get()
         if crop is None:
-            return
+            raise ApplicationPersonSnapshotCreatePersonCropQueueError
         image_bytes = self.image.encode(crop)
         try:
             self.person_snapshot_create.request(
@@ -52,6 +70,10 @@ class ApplicationPersonSnapshotCreate:
                     image_bytes=image_bytes,
                 ),
             )
-        except RepositoryApiPersonSnapshotCreateError:
+        except RepositoryApiPersonSnapshotCreateUnauthorizedError:
+            self.token = None
             await self.person_crop_queue.put(crop)
-            self.token = self.auth_login_camera_client.request()
+            raise ApplicationPersonSnapshotCreateAuthLoginApiError
+        except RepositoryApiPersonSnapshotCreateNotSuccessfulError:
+            await self.person_crop_queue.put(crop)
+            raise ApplicationPersonSnapshotCreatePersonSnapshotCreateApiError

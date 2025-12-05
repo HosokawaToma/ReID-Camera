@@ -1,7 +1,8 @@
+import io
 import cv2
 import numpy as np
 from PIL import Image
-import io
+
 
 class ModuleImage:
     def encode(self, image: np.ndarray) -> bytes:

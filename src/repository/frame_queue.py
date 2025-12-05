@@ -1,11 +1,10 @@
 import asyncio
-from asyncio import Queue
 
 import numpy as np
 
 
 class RepositoryFrameQueue:
-    _queue: Queue[np.ndarray] = Queue()
+    _queue: asyncio.Queue[np.ndarray] = asyncio.Queue()
 
     async def put(self, frame: np.ndarray):
         await RepositoryFrameQueue._queue.put(frame)

@@ -1,11 +1,10 @@
 import asyncio
-from asyncio import Queue
 
 import numpy as np
 
 
 class RepositoryPersonCropQueue:
-    _queue: Queue[np.ndarray] = Queue()
+    _queue: asyncio.Queue[np.ndarray] = asyncio.Queue()
 
     async def put(self, crop: np.ndarray):
         await RepositoryPersonCropQueue._queue.put(crop)

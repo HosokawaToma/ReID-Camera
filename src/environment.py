@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+
 import dotenv
 
 dotenv.load_dotenv()

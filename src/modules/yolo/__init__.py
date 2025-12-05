@@ -26,5 +26,4 @@ class ModuleYolo:
 
     def extract(self, frame: np.ndarray) -> list[ModuleYoloCropPerson]:
         detections = self.model.extract_person_detections(frame)
-        # detections = self.verifier.verify(detections)
         return self.cropper.crops(frame, detections)

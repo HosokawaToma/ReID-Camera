@@ -25,17 +25,20 @@ class RepositoryApiAuthLoginCameraClient:
         self.password = password
 
     def request(self) -> str:
-        response = requests.post(
-            f"{self.base_url}{self.LOGIN_URI}",
-            headers={
-                "Content-Type": "application/json",
-            },
-            json={
-                self.CLIENT_ID_KEY_ON_REQUEST: self.client_id,
-                self.PASSWORD_KEY_ON_REQUEST: self.password,
-            },
-            verify=False,
-        )
+        try:
+            response = requests.post(
+                f"{self.base_url}{self.LOGIN_URI}",
+                headers={
+                    "Content-Type": "application/json",
+                },
+                json={
+                    self.CLIENT_ID_KEY_ON_REQUEST: self.client_id,
+                    self.PASSWORD_KEY_ON_REQUEST: self.password,
+                },
+                verify=False,
+            )
+        except requests.exceptions.RequestException:
+            raise RepositoryApiAuthLoginCameraClientNotSuccessfulError
         if response.status_code != 200:
             raise RepositoryApiAuthLoginCameraClientNotSuccessfulError
         json = response.json()

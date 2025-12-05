@@ -1,12 +1,7 @@
-
-import logging
-
 from modules.yolo import ModuleYolo
 from repository.frame_queue import RepositoryFrameQueue
 from repository.person_crop_queue import RepositoryPersonCropQueue
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 class ApplicationPersonCropCreate:
     def __init__(

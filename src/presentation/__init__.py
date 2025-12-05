@@ -6,7 +6,8 @@ class PresentationLogger:
     def __init__(self):
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(logging.StreamHandler())
+        if not self.logger.hasHandlers():
+            self.logger.addHandler(logging.StreamHandler())
 
     def info(self, message: str) -> None:
         self.logger.info(message)
