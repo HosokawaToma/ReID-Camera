@@ -1,3 +1,5 @@
+import asyncio
+
 from environment import Environment
 from modules.image import ModuleImage
 from repository.api.auth.login.camera_client import (
@@ -55,8 +57,9 @@ class ApplicationPersonSnapshotCreate:
 
     async def handle(self) -> None:
         try:
-            if self.token is None:
-                self.token = self.auth_login_camera_client.request()
+            async with asyncio.Lock():
+                if self.token is None:
+                    self.token = self.auth_login_camera_client.request()
         except RepositoryApiAuthLoginCameraClientError:
             raise ApplicationPersonSnapshotCreateAuthLoginApiError
         crop = await self.person_crop_queue.get()

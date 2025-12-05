@@ -5,6 +5,8 @@ from repository.frame_queue import RepositoryFrameQueue
 
 class ApplicationCameraReadError(Exception):
     pass
+
+
 class ApplicationCamera:
     def __init__(
         self,

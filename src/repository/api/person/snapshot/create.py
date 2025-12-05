@@ -48,4 +48,4 @@ class RepositoryApiPersonSnapshotCreate:
         if response.status_code == 401:
             raise RepositoryApiPersonSnapshotCreateUnauthorizedError
         if response.status_code != 200:
-            raise RepositoryApiPersonSnapshotCreateNotSuccessfulError(response.status_code)
+            raise RepositoryApiPersonSnapshotCreateNotSuccessfulError()
