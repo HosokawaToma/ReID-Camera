@@ -1,14 +1,13 @@
 from typing import List
 
-from entities.yolo.bounding_box import EntityYoloBoundingBox
-from entities.yolo.detections import EntityYoloDetections
+from modules.yolo.model import ModuleYoloBoundingBox, ModuleYoloDetections
 
 
-class ApplicationYoloDetectionsVerifier:
+class ModuleYoloDetectionsVerifier:
     def __init__(self, margin: int = 50):
         self.margin = margin
 
-    def verify(self, person_detections: List[EntityYoloDetections]) -> List[EntityYoloDetections]:
+    def verify(self, person_detections: List[ModuleYoloDetections]) -> List[ModuleYoloDetections]:
         return_person_detections = []
 
         for person_detection in person_detections:
@@ -18,7 +17,7 @@ class ApplicationYoloDetectionsVerifier:
 
         return return_person_detections
 
-    def _is_out_of_frame(self, box: EntityYoloBoundingBox, image_width: int, image_height: int) -> bool:
+    def _is_out_of_frame(self, box: ModuleYoloBoundingBox, image_width: int, image_height: int) -> bool:
         return (box.x1 <= self.margin or
                 box.y1 <= self.margin or
                 box.x2 >= (image_width - self.margin) or
