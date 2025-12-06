@@ -23,7 +23,8 @@ class Environment:
     def get_string_value(self, key: str) -> str:
         value = os.getenv(key)
         if value is None:
-            raise Exception(f"{key} is not set")
+            raise Exception(
+                f"Environment variable '{key}' is not set. Please set it in your .env file or environment.")
         return value
 
     def get_int_value(self, key: str) -> int:
@@ -33,4 +34,5 @@ class Environment:
         try:
             return int(value)
         except ValueError:
-            raise Exception(f"{key} is not a valid integer")
+            raise Exception(
+                f"Environment variable '{key}' is not a valid integer. Please set it in your .env file or environment.")

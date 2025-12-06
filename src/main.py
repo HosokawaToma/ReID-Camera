@@ -21,15 +21,18 @@ class CameraApp:
     @classmethod
     def create(cls, environment: Environment):
         return cls(
-            camera=PresentationCamera.create(),
+            camera=PresentationCamera.create(environment),
             person_crop_create=PresentationPersonCropCreate.create(),
             person_snapshot_create=PresentationPersonSnapshotCreate.create(
                 environment),
         )
 
     async def run(self):
-        while True:
-            await asyncio.sleep(1)
+        try:
+            while True:
+                await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            pass
 
     async def setup(self):
         self.camera.setup()

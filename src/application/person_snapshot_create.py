@@ -37,7 +37,8 @@ class ApplicationPersonSnapshotCreate:
         self.image = image
         self.auth_login_camera_client = auth_login_camera_client
         self.person_snapshot_create = person_snapshot_create
-        self.token = None
+        self._token_lock = asyncio.Lock()
+        self._token = None
 
     @classmethod
     def create(
@@ -57,26 +58,26 @@ class ApplicationPersonSnapshotCreate:
 
     async def handle(self) -> None:
         try:
-            async with asyncio.Lock():
-                if self.token is None:
-                    self.token = self.auth_login_camera_client.request()
+            async with self._token_lock:
+                if self._token is None:
+                    self._token = await asyncio.to_thread(self.auth_login_camera_client.request)
         except RepositoryApiAuthLoginCameraClientError:
-            raise ApplicationPersonSnapshotCreateAuthLoginApiError
+            raise ApplicationPersonSnapshotCreateAuthLoginApiError()
         crop = await self.person_crop_queue.get()
         if crop is None:
-            raise ApplicationPersonSnapshotCreatePersonCropQueueError
+            raise ApplicationPersonSnapshotCreatePersonCropQueueError()
         image_bytes = self.image.encode(crop)
         try:
-            self.person_snapshot_create.request(
+            await asyncio.to_thread(self.person_snapshot_create.request,
                 RepositoryApiPersonSnapshotCreateParams(
-                    token=self.token,
+                    token=self._token,
                     image_bytes=image_bytes,
                 ),
             )
         except RepositoryApiPersonSnapshotCreateUnauthorizedError:
             self.token = None
             await self.person_crop_queue.put(crop)
-            raise ApplicationPersonSnapshotCreateAuthLoginApiError
+            raise ApplicationPersonSnapshotCreateAuthLoginApiError()
         except RepositoryApiPersonSnapshotCreateNotSuccessfulError:
             await self.person_crop_queue.put(crop)
-            raise ApplicationPersonSnapshotCreatePersonSnapshotCreateApiError
+            raise ApplicationPersonSnapshotCreatePersonSnapshotCreateApiError()

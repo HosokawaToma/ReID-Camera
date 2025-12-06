@@ -38,7 +38,7 @@ class RepositoryApiAuthLoginCameraClient:
                 verify=False,
             )
         except requests.exceptions.RequestException:
-            raise RepositoryApiAuthLoginCameraClientNotSuccessfulError
+            raise RepositoryApiAuthLoginCameraClientError
         if response.status_code != 200:
             raise RepositoryApiAuthLoginCameraClientNotSuccessfulError
         json = response.json()

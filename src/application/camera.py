@@ -1,5 +1,6 @@
 import cv2
 
+from environment import Environment
 from repository.frame_queue import RepositoryFrameQueue
 
 
@@ -17,8 +18,8 @@ class ApplicationCamera:
         self.frame_queue = frame_queue
 
     @classmethod
-    def create(cls):
-        return cls(cv2.VideoCapture(0), RepositoryFrameQueue())
+    def create(cls, environment: Environment):
+        return cls(cv2.VideoCapture(environment.camera_index), RepositoryFrameQueue())
 
     async def read(self) -> None:
         ret, frame = self.camera.read()

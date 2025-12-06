@@ -44,8 +44,8 @@ class RepositoryApiPersonSnapshotCreate:
                 verify=False,
             )
         except requests.exceptions.RequestException:
-            raise RepositoryApiPersonSnapshotCreateError
+            raise RepositoryApiPersonSnapshotCreateError()
         if response.status_code == 401:
-            raise RepositoryApiPersonSnapshotCreateUnauthorizedError
+            raise RepositoryApiPersonSnapshotCreateUnauthorizedError()
         if response.status_code != 200:
             raise RepositoryApiPersonSnapshotCreateNotSuccessfulError()

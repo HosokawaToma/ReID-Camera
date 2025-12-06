@@ -1,4 +1,5 @@
 from application.camera import ApplicationCamera
+from environment import Environment
 from presentation import PresentationBase, PresentationLogger
 
 
@@ -12,10 +13,10 @@ class PresentationCamera(PresentationBase):
         self.application = application
 
     @classmethod
-    def create(cls):
+    def create(cls, environment: Environment):
         return cls(
             logger=PresentationLogger(),
-            application=ApplicationCamera.create(),
+            application=ApplicationCamera.create(environment),
         )
 
     async def handle(self) -> None:

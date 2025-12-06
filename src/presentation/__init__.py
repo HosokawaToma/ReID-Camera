@@ -17,6 +17,8 @@ class PresentationLogger:
 
 
 class PresentationBase:
+    DEFAULT_SLEEP_TIME = 0.033
+
     def __init__(self, logger: PresentationLogger):
         self.logger = logger
 
@@ -32,7 +34,7 @@ class PresentationBase:
         while True:
             try:
                 await self.handle()
-                await asyncio.sleep(0.033)
+                await asyncio.sleep(self.DEFAULT_SLEEP_TIME)
             except Exception as e:
                 self.logger.error(f"Error: {e}")
                 await asyncio.sleep(1)
