@@ -38,15 +38,15 @@ class RepositoryApiAuthLoginCameraClient:
                 verify=False,
             )
         except requests.exceptions.RequestException:
-            raise RepositoryApiAuthLoginCameraClientError
+            raise RepositoryApiAuthLoginCameraClientError()
         if response.status_code != 200:
-            raise RepositoryApiAuthLoginCameraClientNotSuccessfulError
+            raise RepositoryApiAuthLoginCameraClientNotSuccessfulError()
         json = response.json()
         if self.TOKEN_KEY_ON_RESPONSE not in json:
-            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError
+            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError()
         token = json[self.TOKEN_KEY_ON_RESPONSE]
         if token is None:
-            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError
+            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError()
         if not isinstance(token, str):
-            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError
+            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError()
         return token

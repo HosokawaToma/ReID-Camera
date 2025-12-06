@@ -30,7 +30,7 @@ class Environment:
     def get_int_value(self, key: str) -> int:
         value = os.getenv(key)
         if value is None:
-            raise Exception(f"{key} is not set")
+            raise Exception(f"{key} is not set. Please set it in your .env file or environment.")
         try:
             return int(value)
         except ValueError:

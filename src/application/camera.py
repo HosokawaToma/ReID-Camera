@@ -24,5 +24,5 @@ class ApplicationCamera:
     async def read(self) -> None:
         ret, frame = self.camera.read()
         if not ret:
-            raise ApplicationCameraReadError
+            raise ApplicationCameraReadError()
         await self.frame_queue.put(frame)
