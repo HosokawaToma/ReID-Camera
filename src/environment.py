@@ -13,12 +13,14 @@ class Environment:
     api_base_url: str = field(init=False)
     api_camera_client_id: str = field(init=False)
     api_password: str = field(init=False)
+    ssl_verify: bool = field(init=False)
 
     def __post_init__(self):
         self.camera_index = self.get_int_value("CAMERA_INDEX")
         self.api_base_url = self.get_string_value("API_BASE_URL")
         self.api_camera_client_id = self.get_string_value("API_CAMERA_CLIENT_ID")
         self.api_password = self.get_string_value("API_PASSWORD")
+        self.ssl_verify = self.get_bool_value("SSL_VERIFY")
 
     def get_string_value(self, key: str) -> str:
         value = os.getenv(key)
@@ -36,3 +38,15 @@ class Environment:
         except ValueError:
             raise Exception(
                 f"Environment variable '{key}' is not a valid integer. Please set it in your .env file or environment.")
+
+    def get_bool_value(self, key: str) -> bool:
+        value = os.getenv(key)
+        if value is None:
+            raise Exception(f"{key} is not set. Please set it in your .env file or environment.")
+        if value.lower() not in ["true", "false"]:
+            raise Exception(f"Environment variable '{key}' is not a valid boolean. Please set it in your .env file or environment.")
+        if value.lower() == "true":
+            return True
+        if value.lower() == "false":
+            return False
+        raise Exception(f"Environment variable '{key}' is not a valid boolean. Please set it in your .env file or environment.")

@@ -3,12 +3,12 @@ import asyncio
 from environment import Environment
 from error import Error
 from modules.image import ModuleImage
-from repository.camera_client_token import (RepositoryCameraClientToken,
-                                            RepositoryCameraClientTokenError)
+from repository.camera_client_token_create import (RepositoryCameraClientTokenCreate,
+                                                    RepositoryCameraClientTokenCreateError)
 from repository.person_crop_queue import RepositoryPersonCropQueue
-from repository.person_snapshot import (RepositoryPersonSnapshotCreate,
-                                        RepositoryPersonSnapshotCreateError,
-                                        RepositoryPersonSnapshotCreateParams)
+from repository.person_snapshot_create import (RepositoryPersonSnapshotCreate,
+                                                RepositoryPersonSnapshotCreateError,
+                                                RepositoryPersonSnapshotCreateParams)
 
 
 class ApplicationPersonSnapshotCreateError(Error):
@@ -19,13 +19,13 @@ class ApplicationPersonSnapshotCreate:
         self,
         person_crop_queue: RepositoryPersonCropQueue,
         image: ModuleImage,
-        camera_client_token: RepositoryCameraClientToken,
-        person_snapshot_create: RepositoryPersonSnapshotCreate,
+        camera_client_token: RepositoryCameraClientTokenCreate,
+        person_snapshot: RepositoryPersonSnapshotCreate,
     ):
         self.person_crop_queue = person_crop_queue
         self.image = image
         self.camera_client_token = camera_client_token
-        self.person_snapshot_create = person_snapshot_create
+        self.person_snapshot = person_snapshot
         self._token_lock = asyncio.Lock()
         self._token = None
 
@@ -37,12 +37,8 @@ class ApplicationPersonSnapshotCreate:
         return cls(
             RepositoryPersonCropQueue(),
             ModuleImage(),
-            RepositoryCameraClientToken(
-                base_url=environment.api_base_url,
-                client_id=environment.api_camera_client_id,
-                password=environment.api_password,
-            ),
-            RepositoryPersonSnapshotCreate(base_url=environment.api_base_url),
+            RepositoryCameraClientTokenCreate.create(environment),
+            RepositoryPersonSnapshotCreate.create(environment),
         )
 
     async def handle(self) -> None:
@@ -50,7 +46,7 @@ class ApplicationPersonSnapshotCreate:
             async with self._token_lock:
                 if self._token is None:
                     self._token = await asyncio.to_thread(self.camera_client_token.request)
-        except RepositoryCameraClientTokenError as e:
+        except RepositoryCameraClientTokenCreateError as e:
             raise ApplicationPersonSnapshotCreateError(e.message)
 
         crop = await self.person_crop_queue.get()
@@ -59,13 +55,14 @@ class ApplicationPersonSnapshotCreate:
         image_bytes = self.image.encode(crop)
 
         try:
-            await asyncio.to_thread(self.person_snapshot_create.request,
+            await asyncio.to_thread(self.person_snapshot.request,
                 RepositoryPersonSnapshotCreateParams(
                     token=self._token,
                     image_bytes=image_bytes,
                 ),
             )
         except RepositoryPersonSnapshotCreateError as e:
-            self.token = None
+            async with self._token_lock:
+                self._token = None
             await self.person_crop_queue.put(crop)
             raise ApplicationPersonSnapshotCreateError(e.message)

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 
@@ -19,7 +18,7 @@ class ModuleYoloCropFrame:
         ]
         return ModuleYoloCropPerson(detection.bounding_box, person_cropped_image)
 
-    def crops(self, frame: np.ndarray, detections: List[ModuleYoloDetections]) -> list[ModuleYoloCropPerson]:
+    def crops(self, frame: np.ndarray, detections: list[ModuleYoloDetections]) -> list[ModuleYoloCropPerson]:
         person_cropped_images = []
         for detection in detections:
             person_cropped_image = self.crop(frame, detection)

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import requests
 
+from environment import Environment
 from error import Error
 
 
@@ -21,8 +22,16 @@ class RepositoryPersonSnapshotCreate:
     IMAGE_CONTENT_TYPE = "image/jpeg"
     TIMESTAMP_KEY = "timestamp"
 
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, ssl_verify: bool):
         self.base_url = base_url
+        self.ssl_verify = ssl_verify
+
+    @classmethod
+    def create(cls, environment: Environment) -> "RepositoryPersonSnapshotCreate":
+        return cls(
+            base_url=environment.api_base_url,
+            ssl_verify=environment.ssl_verify,
+        )
 
     def request(self, params: RepositoryPersonSnapshotCreateParams) -> None:
         image = [(self.IMAGE_KEY, (self.IMAGE_NAME, params.image_bytes, self.IMAGE_CONTENT_TYPE))]
@@ -37,9 +46,11 @@ class RepositoryPersonSnapshotCreate:
                 },
                 files=image,
                 data=data,
-                verify=False,
+                verify=self.ssl_verify,
             )
         except requests.exceptions.RequestException:
-            raise RepositoryPersonSnapshotCreateError("Failed to request person snapshot create")
+            raise RepositoryPersonSnapshotCreateError(
+                "Failed to request person snapshot create")
         if response.status_code != 200:
-            raise RepositoryPersonSnapshotCreateError("Request failed with status code: " + str(response.status_code))
+            raise RepositoryPersonSnapshotCreateError(
+                "Request failed with status code: " + str(response.status_code))

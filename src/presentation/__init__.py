@@ -23,12 +23,7 @@ class PresentationBase:
         self.logger = logger
 
     def setup(self) -> None:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        loop.create_task(self.run())
+        asyncio.create_task(self.run())
 
     async def run(self) -> None:
         while True:
