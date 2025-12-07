@@ -1,10 +1,11 @@
 import cv2
 
 from environment import Environment
+from error import Error
 from repository.frame_queue import RepositoryFrameQueue
 
 
-class ApplicationCameraReadError(Exception):
+class ApplicationCameraReadError(Error):
     pass
 
 
@@ -24,5 +25,5 @@ class ApplicationCamera:
     async def read(self) -> None:
         ret, frame = self.camera.read()
         if not ret:
-            raise ApplicationCameraReadError()
+            raise ApplicationCameraReadError("Failed to read frame from camera")
         await self.frame_queue.put(frame)

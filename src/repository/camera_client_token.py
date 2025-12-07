@@ -1,19 +1,13 @@
 import requests
 
+from error import Error
 
-class RepositoryApiAuthLoginCameraClientError(Exception):
+
+class RepositoryCameraClientTokenError(Error):
     pass
 
 
-class RepositoryApiAuthLoginCameraClientNotSuccessfulError(RepositoryApiAuthLoginCameraClientError):
-    pass
-
-
-class RepositoryApiAuthLoginCameraClientTokenNotFoundError(RepositoryApiAuthLoginCameraClientError):
-    pass
-
-
-class RepositoryApiAuthLoginCameraClient:
+class RepositoryCameraClientToken:
     LOGIN_URI = "/api/v1/auth/login/camera_client"
     CLIENT_ID_KEY_ON_REQUEST = "camera_client_id"
     PASSWORD_KEY_ON_REQUEST = "password"
@@ -38,15 +32,15 @@ class RepositoryApiAuthLoginCameraClient:
                 verify=False,
             )
         except requests.exceptions.RequestException:
-            raise RepositoryApiAuthLoginCameraClientError()
+            raise RepositoryCameraClientTokenError("Failed to request camera client token")
         if response.status_code != 200:
-            raise RepositoryApiAuthLoginCameraClientNotSuccessfulError()
+            raise RepositoryCameraClientTokenError("Request failed with status code: " + str(response.status_code))
         json = response.json()
         if self.TOKEN_KEY_ON_RESPONSE not in json:
-            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError()
+            raise RepositoryCameraClientTokenError("Token not found in response")
         token = json[self.TOKEN_KEY_ON_RESPONSE]
         if token is None:
-            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError()
+            raise RepositoryCameraClientTokenError("Token is None")
         if not isinstance(token, str):
-            raise RepositoryApiAuthLoginCameraClientTokenNotFoundError()
+            raise RepositoryCameraClientTokenError("Token is not a string")
         return token
