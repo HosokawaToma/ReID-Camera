@@ -1,16 +1,31 @@
+from dataclasses import dataclass
+
 import numpy as np
 from ultralytics.engine.results import Boxes
 from ultralytics.models.yolo import YOLO
 
-from entities.yolo.bounding_box import EntityYoloBoundingBox
-from entities.yolo.detections import EntityYoloDetections
+
+@dataclass
+class ModuleYoloBoundingBox:
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+    width: int
+    height: int
 
 
-class ApplicationYoloModel:
+@dataclass
+class ModuleYoloDetections:
+    bounding_box: ModuleYoloBoundingBox
+    confidence: float
+    cls: int
+
+class ModuleYoloModel:
     def __init__(
         self,
         model_path: str = "resources/models/yolo11n.pt",
-        confidence_threshold: float = 0.9,
+        confidence_threshold: float = 0.5,
         iou_threshold: float = 0.3,
         imgsz: tuple[int, int] = (640, 640),
         agnostic_nms: bool = False,
@@ -27,7 +42,7 @@ class ApplicationYoloModel:
         self.verbose = verbose
         self.tracker = tracker
 
-    def extract_person_detections(self, frame: np.ndarray) -> list[EntityYoloDetections]:
+    def extract_person_detections(self, frame: np.ndarray) -> list[ModuleYoloDetections]:
         yolo_results = self.model.track(
             frame,
             persist=True,
@@ -56,9 +71,9 @@ class ApplicationYoloModel:
                 box_height = int(box_xywh[3])
                 box_conf = float(box.conf[0].cpu().numpy())
                 box_cls = int(box.cls[0].cpu().numpy())
-                bounding_box = EntityYoloBoundingBox(
+                bounding_box = ModuleYoloBoundingBox(
                     box_x1, box_y1, box_x2, box_y2, box_width, box_height)
-                detections.append(EntityYoloDetections(
+                detections.append(ModuleYoloDetections(
                     bounding_box=bounding_box,
                     confidence=box_conf,
                     cls=box_cls,
