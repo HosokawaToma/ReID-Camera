@@ -1,33 +1,29 @@
 import asyncio
 
+from domain.frame import DomainFrame
+from dto.frame_numpy import DtoFrameNumpy
 from environment import Environment
 from error import Error
-from modules.image import ModuleImage
-from repository.camera_client_token_create import (RepositoryCameraClientTokenCreate,
-                                                    RepositoryCameraClientTokenCreateError)
-from repository.person_crop_queue import RepositoryPersonCropQueue
-from repository.person_snapshot_create import (RepositoryPersonSnapshotCreate,
-                                                RepositoryPersonSnapshotCreateError,
-                                                RepositoryPersonSnapshotCreateParams)
+from repository.admin_token import RepositoryAdminToken
+from repository.person_snapshot_create import (
+    RepositoryPersonSnapshotCreate,
+    RepositoryPersonSnapshotCreateUnauthorizedError)
 
 
 class ApplicationPersonSnapshotCreateError(Error):
     pass
 
+
 class ApplicationPersonSnapshotCreate:
     def __init__(
         self,
-        person_crop_queue: RepositoryPersonCropQueue,
-        image: ModuleImage,
-        camera_client_token: RepositoryCameraClientTokenCreate,
+        admin_token: RepositoryAdminToken,
         person_snapshot: RepositoryPersonSnapshotCreate,
     ):
-        self.person_crop_queue = person_crop_queue
-        self.image = image
-        self.camera_client_token = camera_client_token
+        self.admin_token = admin_token
         self.person_snapshot = person_snapshot
-        self._token_lock = asyncio.Lock()
-        self._token = None
+        self.token = None
+        self.token_lock = asyncio.Lock()
 
     @classmethod
     def create(
@@ -35,34 +31,31 @@ class ApplicationPersonSnapshotCreate:
         environment: Environment,
     ) -> "ApplicationPersonSnapshotCreate":
         return cls(
-            RepositoryPersonCropQueue(),
-            ModuleImage(),
-            RepositoryCameraClientTokenCreate.create(environment),
+            RepositoryAdminToken.create(environment),
             RepositoryPersonSnapshotCreate.create(environment),
         )
 
-    async def handle(self) -> None:
+    async def handle(self, frame: DtoFrameNumpy) -> None:
         try:
-            async with self._token_lock:
-                if self._token is None:
-                    self._token = await asyncio.to_thread(self.camera_client_token.request)
-        except RepositoryCameraClientTokenCreateError as e:
-            raise ApplicationPersonSnapshotCreateError(e.message)
-
-        crop = await self.person_crop_queue.get()
-        if crop is None:
-            raise ApplicationPersonSnapshotCreateError("Failed to get crop from person crop queue")
-        image_bytes = self.image.encode(crop)
-
+            async with self.token_lock:
+                if self.token is None:
+                    self.token = await self.admin_token.request()
+        except Error as error:
+            raise ApplicationPersonSnapshotCreateError(error)
         try:
-            await asyncio.to_thread(self.person_snapshot.request,
-                RepositoryPersonSnapshotCreateParams(
-                    token=self._token,
-                    image_bytes=image_bytes,
-                ),
+            await self.person_snapshot.create_by_frame(
+                self.token,
+                DomainFrame.create_from_numpy(frame.image, frame.timestamp)
             )
-        except RepositoryPersonSnapshotCreateError as e:
-            async with self._token_lock:
-                self._token = None
-            await self.person_crop_queue.put(crop)
-            raise ApplicationPersonSnapshotCreateError(e.message)
+        except RepositoryPersonSnapshotCreateUnauthorizedError as error:
+            try:
+                async with self.token_lock:
+                    self.token = await self.admin_token.request()
+                await self.person_snapshot.create_by_frame(
+                    self.token,
+                    DomainFrame.create_from_numpy(frame.image, frame.timestamp)
+                )
+            except Error as try_error:
+                raise ApplicationPersonSnapshotCreateError(try_error)
+        except Error as error:
+            raise ApplicationPersonSnapshotCreateError(error)

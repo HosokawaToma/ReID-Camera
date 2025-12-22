@@ -1,11 +1,18 @@
+import datetime
+import time
+from typing import Generator
+
 import cv2
 
+from dto.frame_numpy import DtoFrameNumpy
 from environment import Environment
 from error import Error
-from repository.frame_queue import RepositoryFrameQueue
 
 
-class ApplicationCameraReadError(Error):
+class ApplicationCameraError(Error):
+    pass
+
+class ApplicationCameraReadError(ApplicationCameraError):
     pass
 
 
@@ -13,17 +20,16 @@ class ApplicationCamera:
     def __init__(
         self,
         camera: cv2.VideoCapture,
-        frame_queue: RepositoryFrameQueue,
     ):
         self.camera = camera
-        self.frame_queue = frame_queue
 
     @classmethod
     def create(cls, environment: Environment):
-        return cls(cv2.VideoCapture(environment.camera_index), RepositoryFrameQueue())
+        return cls(cv2.VideoCapture(environment.camera_index))
 
-    async def read(self) -> None:
-        ret, frame = self.camera.read()
-        if not ret:
-            raise ApplicationCameraReadError("Failed to read frame from camera")
-        await self.frame_queue.put(frame)
+    def read(self) -> Generator[DtoFrameNumpy, None, None]:
+        while True:
+            ret, image = self.camera.read()
+            if not ret:
+                raise ApplicationCameraReadError()
+            yield DtoFrameNumpy(image, datetime.datetime.now())
